@@ -40,22 +40,52 @@ namespace Linq2
             };
 
             var rs1 = products.Where(p => p.Category.Tier == 1 && p.Price < 900.00);
-
+            var rs1sql = 
+                from p in products 
+                where p.Category.Tier == 1 && p.Price < 900.00
+                select p;
             Print("TIER 1 AND PRICE < 900: ", rs1);
+            Print("SQL LIKE: TIER 1 AND PRICE < 900: ", rs1sql);
 
             var rs2 = products.Where(p => p.Category.Name == "Tools").Select(p => p.Name);
+            var rs2sql = 
+                from p in products
+                where p.Category.Name == "Tools"
+                select p.Name;
 
             Print("NAMES OF PRODUCTS FROM TOOLS", rs2);
+            Print("SQL LIKE: NAMES OF PRODUCTS FROM TOOLS", rs2sql);
 
             var rs3 = products.Where(p => p.Name.StartsWith("c", true, CultureInfo.InvariantCulture)).Select(p => new { p.Name, p.Price, CategoryName = p.Category.Name });
+            var rs3sql =
+                from p in products
+                where p.Name.StartsWith("c", StringComparison.InvariantCultureIgnoreCase)
+                select new { 
+                    p.Name, 
+                    p.Price, 
+                    CategoryName = p.Category.Name 
+                };
 
             Print("PRODUCTS STARTING WITH 'C'", rs3);
+            Print("SQL LIKE:PRODUCTS STARTING WITH 'C'", rs3sql);
 
             var rs4 = products.Where(p => p.Category.Tier == 1).OrderBy(p => p.Price).ThenBy(p => p.Name);
+            var rs4sql =
+                from p in products
+                where p.Category.Tier == 1
+                orderby p.Name ascending
+                orderby p.Price ascending
+                select p;
+
             Print("TIER 1 ORDER BY PER PRICE THEN BY NAME", rs4);
+            Print("SQL LIKE: TIER 1 ORDER BY PER PRICE THEN BY NAME", rs4sql);
 
             var rs5 = rs4.Skip(2).Take(4);
+            var rs5sql =
+                (from p in rs4
+                    select p).Skip(2).Take(4);
             Print("TIER 1 ORDER BY PER PRICE THEN BY NAME, SKIP 2 TAKE 4", rs5);
+            Print("SQL LIKE: TIER 1 ORDER BY PER PRICE THEN BY NAME, SKIP 2 TAKE 4", rs5sql);
 
             var rs6 = products.First();
             Console.WriteLine($"First teste1: {rs6}\n");
@@ -90,9 +120,22 @@ namespace Linq2
             Console.WriteLine("\nGroupBy:\n");
 
             var rs16 = products.GroupBy(p => p.Category);
+            var rs16sql = 
+                from p in products
+                group p by p.Category;
             foreach (IGrouping<Category, Product> group in rs16)
             {
                 Console.WriteLine($"Category: {group.Key.Name}");
+                foreach (Product product in group)
+                {
+                    Console.WriteLine(product);
+                }
+                Console.WriteLine();
+            }
+
+            foreach (IGrouping<Category, Product> group in rs16sql)
+            {
+                Console.WriteLine($"SQL LIKE: Category: {group.Key.Name}");
                 foreach (Product product in group)
                 {
                     Console.WriteLine(product);
